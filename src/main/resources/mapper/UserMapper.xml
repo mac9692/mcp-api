@@ -5,19 +5,45 @@
 
     <select id="selectUserInfo" parameterType="string" resultType="com.js.mcpapi.dto.UserInfoDto">
         SELECT
-            user_id as userId,
-            user_nm as userNm,
-            user_email as userEmail,
-            user_phone as userPhone,
-            user_birth_dt as userBirthDt,
-            user_first_login_dtm as userFirstLoginDtm
-        FROM st_user_base
-        WHERE user_id = #{userId}
+            ub.user_id as userId,
+            ub.user_login_id as userLoginId,
+            ub.user_nm as userNm,
+            ub.user_email as userEmail,
+            ub.user_phone as userPhone,
+            ub.user_birth_dt as userBirthDt,
+            ub.user_first_login_dtm as userFirstLoginDtm,
+            COALESCE(ua_point.asset_balance, 0) as pointBalance,
+            COALESCE(ua_coin.asset_balance, 0) as coinBalance
+        FROM st_user_base ub
+        LEFT JOIN st_user_asset ua_point ON ub.user_id = ua_point.user_id AND ua_point.asset_type_cd = '10'
+        LEFT JOIN st_user_asset ua_coin ON ub.user_id = ua_coin.user_id AND ua_coin.asset_type_cd = '20'
+        WHERE ub.user_id = #{userId}
+    </select>
+
+    <select id="selectUserInfoByLoginId" parameterType="string" resultType="com.js.mcpapi.dto.UserInfoDto">
+        SELECT
+            ub.user_id as userId,
+            ub.user_login_id as userLoginId,
+            ub.user_nm as userNm,
+            ub.user_email as userEmail,
+            ub.user_phone as userPhone,
+            ub.user_birth_dt as userBirthDt,
+            ub.user_first_login_dtm as userFirstLoginDtm,
+            COALESCE(ua_point.asset_balance, 0) as pointBalance,
+            COALESCE(ua_coin.asset_balance, 0) as coinBalance
+        FROM st_user_base ub
+        LEFT JOIN st_user_asset ua_point ON ub.user_id = ua_point.user_id AND ua_point.asset_type_cd = '10'
+        LEFT JOIN st_user_asset ua_coin ON ub.user_id = ua_coin.user_id AND ua_coin.asset_type_cd = '20'
+        WHERE ub.user_login_id = #{userLoginId}
     </select>
 
     <insert id="insertUser" parameterType="com.js.mcpapi.dto.RegisterRequestDto">
+        <selectKey keyProperty="userId" resultType="long" order="BEFORE">
+            SELECT NEXTVAL('st_user_base_user_id_seq')
+        </selectKey>
         INSERT INTO st_user_base (
             user_id,
+            user_login_id,
             user_nm,
             user_email,
             user_phone,
@@ -28,13 +54,14 @@
             sys_mod_dtm
         ) VALUES (
             #{userId},
+            #{userLoginId},
             #{userNm},
             #{userEmail},
             #{userPhone},
             #{userBirthDt}::date,
-            #{userId},
+            #{userLoginId},
             NOW(),
-            #{userId},
+            #{userLoginId},
             NOW()
         )
     </insert>
@@ -66,22 +93,23 @@
     <select id="checkUserExists" parameterType="string" resultType="int">
         SELECT COUNT(*)
         FROM st_user_base
-        WHERE user_id = #{userId}
+        WHERE user_login_id = #{userId}
     </select>
 
     <select id="selectUserPassword" parameterType="string" resultType="string">
-        SELECT user_password
-        FROM st_user_auth
-        WHERE user_id = #{userId}
-          AND is_active = true
+        SELECT ua.user_password
+        FROM st_user_auth ua
+        JOIN st_user_base ub ON ua.user_id = ub.user_id
+        WHERE ub.user_login_id = #{userId}
+          AND ua.is_active = true
     </select>
 
     <update id="updateFirstLoginTime" parameterType="string">
         UPDATE st_user_base
         SET user_first_login_dtm = NOW(),
-            sys_mod_id = #{userId},
+            sys_mod_id = user_login_id,
             sys_mod_dtm = NOW()
-        WHERE user_id = #{userId}
+        WHERE user_login_id = #{userId}
           AND user_first_login_dtm IS NULL
     </update>
 
@@ -91,7 +119,9 @@
             login_fail_count = 0,
             sys_mod_id = #{userId},
             sys_mod_dtm = NOW()
-        WHERE user_id = #{userId}
+        FROM st_user_base ub
+        WHERE st_user_auth.user_id = ub.user_id
+          AND ub.user_login_id = #{userId}
     </update>
 
 </mapper>

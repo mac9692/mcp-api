@@ -9,9 +9,11 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper {
     UserInfoDto selectUserInfo(@Param("userId") String userId);
 
+    UserInfoDto selectUserInfoByLoginId(@Param("userLoginId") String userLoginId);
+
     int insertUser(RegisterRequestDto registerRequest);
 
-    int insertUserAuth(@Param("userId") String userId, @Param("password") String password);
+    int insertUserAuth(@Param("userId") Long userId, @Param("password") String password);
 
     int checkUserExists(@Param("userId") String userId);
 

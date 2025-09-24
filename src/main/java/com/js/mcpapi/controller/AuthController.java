@@ -16,7 +16,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
     public ResponseEntity<AuthResponseDto> register(@RequestBody RegisterRequestDto request) {
         AuthResponseDto response = authService.register(request);
         return ResponseEntity.ok(response);
@@ -25,6 +25,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto request) {
         AuthResponseDto response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthResponseDto> logout() {
+        AuthResponseDto response = authService.logout();
         return ResponseEntity.ok(response);
     }
 }
