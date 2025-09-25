@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Getter
 @Setter
-@Component
 @ConfigurationProperties(prefix = "payment.nice")
 public class NicePaymentConfig {
 

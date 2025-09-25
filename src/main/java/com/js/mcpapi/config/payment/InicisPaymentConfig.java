@@ -3,7 +3,6 @@ package com.js.mcpapi.config.payment;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * 이니시스 결제 설정 클래스
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
  */
 @Getter
 @Setter
-@Component
 @ConfigurationProperties(prefix = "payment.inicis")
 public class InicisPaymentConfig {
 

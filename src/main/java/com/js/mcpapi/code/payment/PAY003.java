@@ -11,10 +11,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum PAY003 {
-    INICIS_PAY("10", "이니시스"),
-    NICE_PAY("20", "나이스페이"),
-    TOSS_PAY("30", "토스페이");
+    INICIS_PAY("10", "이니시스", 100),
+    NICE_PAY("20", "나이스페이", 0),
+    TOSS_PAY("30", "토스페이", 0);
 
     private final String code;
     private final String desc;
+    private final int weight;
 }
